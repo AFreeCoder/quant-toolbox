@@ -18,7 +18,7 @@ def xirr(cash_flow):
     args:
         cash_flow: list, element格式：(date, cash)，示例：(datetime.date(2021, 1, 2), -100)
             cash 为负表示买入，为正表示卖出
-    """    
+    """
     years = [(ta[0] - cash_flow[0][0]).days / 365. for ta in cash_flow]
     residual = 1.0
     step = 0.04
@@ -46,12 +46,14 @@ def roa(cash_flow):
         cash_flow: list, element格式：(date, cash)，示例：(datetime.date(2021, 1, 2), -100)
             cash 为负表示买入，为正表示卖出
             cash_flow 最后一条数据为
-    """    
+    """
     profit = sum([item[1] for item in cash_flow])
     fv = cash_flow[-1][1]
     return profit/float(fv - profit)
 
+
 if __name__ == "__main__":
-    cash_flow = [(datetime.date(2021, 1, 2), -100.0), (datetime.date(2021, 2, 5), -400), (datetime.date(2021, 3, 6), -100), (datetime.date(2021, 3, 29), -300),  (datetime.date(2021, 4, 30), 950)]
+    cash_flow = [(datetime.date(2021, 1, 2), -100.0), (datetime.date(2021, 2, 5), -400), (datetime.date(
+        2021, 3, 6), -100), (datetime.date(2021, 3, 29), -300),  (datetime.date(2021, 4, 30), 950)]
     print(xirr(cash_flow))
     print(roa(cash_flow))

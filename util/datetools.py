@@ -4,7 +4,7 @@
 @Description: date 相关小工具
 @Date: 2021-06-19 17:58:06
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-06-28 00:42:30
+@LastEditTime: 2021-07-02 23:25:57
 """
 
 from datetime import datetime
@@ -19,20 +19,23 @@ def gen_date_order(start, end, frequent):
         end: 终止日期，格式同 start
         frequent: 定投频率，字符串类型。m:月；w:周
     return:
-        
-    """    
+
+    """
     start_time = datetime.strptime(start, "%Y%m%d")
     end_time = datetime.strptime(end, "%Y%m%d")
     date_order = []
     i = 0
-    while i>=0:
+    while i >= 0:
         if frequent == "m":
-            week = 0; month = i
+            week = 0
+            month = i
         elif frequent == "w":
-            week = i; month = 0
+            week = i
+            month = 0
         else:
             raise Exception("Invalid param: frequent!", frequent)
-        temp = start_time + relativedelta.relativedelta(months=month, weeks=week)
+        temp = start_time + \
+            relativedelta.relativedelta(months=month, weeks=week)
         if temp > end_time:
             break
         date_order.append(temp)
