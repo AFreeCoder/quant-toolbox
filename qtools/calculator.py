@@ -4,15 +4,15 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-06-29 18:35:01
+@LastEditTime: 2021-07-02 23:25:20
 """
 
 import os
 import sys
 
-sys.path.append(os.getcwd())
-
 from util import rr
+
+sys.path.append(os.getcwd())
 
 
 def get_cash_flow(invest_note, invest_res):
@@ -22,7 +22,7 @@ def get_cash_flow(invest_note, invest_res):
         invest_res 表示期末情况，格式为(date, point, cash)，此处cash表示资产总额
     return:
         cash_flow: [(date, cash)...], cash为负表示买入，为正表示卖出
-    """    
+    """
     cash_flow = [(t[0].date(), t[2]) for t in invest_note]
     cash_flow.append((invest_res[0].date(), invest_res[2]))
     return cash_flow

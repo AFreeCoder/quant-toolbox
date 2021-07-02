@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-06-29 18:35:14
+@LastEditTime: 2021-07-02 23:24:38
 """
 
 from datetime import datetime, timedelta
@@ -26,7 +26,7 @@ def fix_investment(df: pd.DataFrame, start, end, frequent, quantity):
         返回值格式: (v1, v2)
         v1 表示资金进出记录，格式为[(date, point, cash)...]，cash为负表示买入，为正表示卖出
         v2 表示end当天的情况，格式为(date, point, cash)，此处cash表示资产总额
-    """    
+    """
     date_order = dateutil.gen_date_order(start, end, frequent)
     end_date = datetime.strptime(end, "%Y%m%d")
     df = df[["trade_date", "close"]]
@@ -34,11 +34,12 @@ def fix_investment(df: pd.DataFrame, start, end, frequent, quantity):
     share = 0
     invest_note = []
     for _, row in df.iterrows():
-        if i< len(date_order) and row["trade_date"] >= date_order[i]:
+        if i < len(date_order) and row["trade_date"] >= date_order[i]:
             share += quantity / row["close"]
-            invest_note.append((row["trade_date"], round(row["close"], 2), -quantity))
+            invest_note.append(
+                (row["trade_date"], round(row["close"], 2), -quantity))
             i += 1
-    df = df[df["trade_date"]<=end_date]
+    df = df[df["trade_date"] <= end_date]
     current_point = df["close"][len(df)-1]
     total_amount = round(current_point * share, 2)
     return invest_note, (end_date, current_point, total_amount)
@@ -55,10 +56,10 @@ def evaluate_index_percent(df: pd.DataFrame, input: pd.Series):
     """
 
     # 百分位的统计只能基于历史数据
-    history_df = df[df["trade_date"]<=input["trade_date"]]
+    history_df = df[df["trade_date"] <= input["trade_date"]]
     ten_years_before = input["trade_date"] + timedelta(days=-3650)
-    history_df = history_df[history_df["trade_date"]>ten_years_before]
-    low_df = history_df[history_df["pe"]<=input["pe"]]
+    history_df = history_df[history_df["trade_date"] > ten_years_before]
+    low_df = history_df[history_df["pe"] <= input["pe"]]
     pt = round(len(low_df) / len(history_df), 2)
     return pt
 
@@ -79,7 +80,7 @@ def fix_investment_plus_v1(df: pd.DataFrame, start, end, low_percent, high_perce
         返回值格式: (v1, v2)
         v1 表示资金进出记录，格式为[(date, point, cash)...]，cash为负表示买入，为正表示卖出
         v2 表示end当天的情况，格式为(date, point, cash)，此处cash表示资产总额
-    
+
     note: 记录现金流的时候涉及两个账户，一个是现金账户，一个是指数账户，这里只计算现金账户的进出，不考虑现金账户和指数账户之间的转账
     """
     date_order = dateutil.gen_date_order(start, end, frequent)
@@ -91,9 +92,10 @@ def fix_investment_plus_v1(df: pd.DataFrame, start, end, low_percent, high_perce
     cash = 0
     for _, row in df.iterrows():
         # 定投日期（操作日期）
-        if i< len(date_order) and row["trade_date"] >= date_order[i]:
+        if i < len(date_order) and row["trade_date"] >= date_order[i]:
             cash += quantity
-            invest_note.append((row["trade_date"], round(row["close"], 2), -quantity))
+            invest_note.append(
+                (row["trade_date"], round(row["close"], 2), -quantity))
             # 根据估值判断是买点，还是卖点，还是不操作
             current_percent = evaluate_index_percent(df, row)
             if current_percent <= low_percent:
@@ -106,12 +108,13 @@ def fix_investment_plus_v1(df: pd.DataFrame, start, end, low_percent, high_perce
                 share = 0
             else:
                 # 不操作
-                pass 
+                pass
             i += 1
-    df = df[df["trade_date"]<=end_date]
+    df = df[df["trade_date"] <= end_date]
     current_point = df["close"][len(df)-1]
     total_amount = round(current_point * share + cash, 2)
     return invest_note, (end_date, current_point, total_amount)
+
 
 if __name__ == "__main__":
     pass

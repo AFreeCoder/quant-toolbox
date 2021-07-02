@@ -1,9 +1,12 @@
 # tushare 账户 token
-token = "you token"
+token = "your token"
 
 # 指数列表
 index_codes = [
-    "000300.SH",
+    "000300.SH",  # 沪深300
+    "000905.SH",  # 中证500
+    "000688.SH",  # 科创50
+    "399006.SZ"   # 创业板指
 ]
 
 # 有每日指标数据的大盘指数列表
