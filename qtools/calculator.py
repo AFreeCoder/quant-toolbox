@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-07-02 23:25:20
+@LastEditTime: 2021-08-01 17:42:03
 """
 
 import os
@@ -15,20 +15,21 @@ from util import rr
 sys.path.append(os.getcwd())
 
 
-def get_cash_flow(invest_note, invest_res):
+def get_cash_flow(invest_note):
     """根据投资记录生成现金流明细
     args:
-        invest_note 表示资金进出记录，格式为[(date, point, cash)...]，cash为负表示买入，为正表示卖出
-        invest_res 表示期末情况，格式为(date, point, cash)，此处cash表示资产总额
+        invest_note 表示资金进出记录，格式为[{
+            "date": d,
+            "quantity": cash
+        }...]，cash为负表示买入，为正表示卖出
     return:
         cash_flow: [(date, cash)...], cash为负表示买入，为正表示卖出
     """
-    cash_flow = [(t[0].date(), t[2]) for t in invest_note]
-    cash_flow.append((invest_res[0].date(), invest_res[2]))
+    cash_flow = [(t["date"], t["quantity"]) for t in invest_note]
     return cash_flow
 
 
-def compute_rr(invest_note, invest_res):
+def compute_rr(invest_note):
     """根据投资记录 invest_note 和投资结果 invest_res，
     计算年化收益率 irr 和实际收益率 roa
     args:
@@ -38,7 +39,7 @@ def compute_rr(invest_note, invest_res):
         irr: 年化收益率
         row: 总收益率
     """
-    cash_flow = get_cash_flow(invest_note, invest_res)
+    cash_flow = get_cash_flow(invest_note)
     irr = rr.xirr(cash_flow)
     roa = rr.roa(cash_flow)
     return round(irr, 4), round(roa, 4)
