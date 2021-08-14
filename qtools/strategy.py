@@ -4,9 +4,10 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-01 17:52:39
+@LastEditTime: 2021-08-15 03:40:58
 """
 
+import math
 from datetime import datetime, timedelta
 from typing import List
 
@@ -30,7 +31,8 @@ class Bond:
         })
 
     def compute_percentile(self, input):
-        """对指数估值，返回输入数据在历史数据中的百分位
+        """Todo: 把输入改成日期
+        对指数估值，返回输入数据在历史数据中的百分位
         args:
             df: 历史数据
             input: index至少包含[trade_date, pe]
@@ -42,24 +44,43 @@ class Bond:
         # 百分位的统计只能基于历史数据
         history_df = self.daily[self.daily["trade_date"]
                                 <= input["trade_date"]]
-        ten_years_before = input["trade_date"] + timedelta(days=-3650)
+        ten_years_before = input["trade_date"] + timedelta(days=-2920)
         history_df = history_df[history_df["trade_date"] > ten_years_before]
-        low_df = history_df[history_df["pe"] <= input["pe"]]
+        low_df = history_df[history_df["pe_ttm"] <= input["pe_ttm"]]
         pt = round(len(low_df) / len(history_df), 2)
         return pt
+
+    def compute_boge_rr(self, start:datetime, current:datetime):
+        """博格公式估算年化收益率：初始股息率+盈利增长率+市盈率变化率
+        """        
+        # 默认初始股息率是2%
+        dv_rate = 0.02
+
+        s_data = self.get_index_data_by_day(start)
+        e_data = self.get_index_data_by_day(current)
+        
+        year = (current - start).days / 365
+        # 盈利增长率
+        profit_rate = math.pow(
+            (e_data["close"]/e_data["pe_ttm"])/(s_data["close"]/s_data["pe_ttm"]), 1/year) - 1
+            
+        # 市盈率变化率
+        pe_rate = math.pow(e_data["pe_ttm"]/s_data["pe_ttm"], 1/year) - 1
+        
+        return profit_rate+pe_rate
 
     def buy_on_day(self, date, quantity):
         daily = self.get_index_data_by_day(date)
         close = daily["close"]
         self.share += quantity / close
-        self.add_operation_note(date, close, -quantity)
+        self.add_operation_note(daily["trade_date"], close, -quantity)
         return
 
     def sell_on_day(self, date, share):
         daily = self.get_index_data_by_day(date)
         close = daily["close"]
         self.share -= share
-        self.add_operation_note(date, close, share * close)
+        self.add_operation_note(daily["trade_date"], close, share * close)
         return share * close
 
     def sell_out_on_day(self, date):
@@ -160,6 +181,54 @@ def fix_investment_plus_v1(bond:Bond, start, end, low_percent, high_percent, fre
             bond.buy_on_day(d, cash)
             cash = 0
         elif percent >= high_percent:
+            # 高估卖出
+            cash += bond.sell_out_on_day(d)
+        else:
+            pass
+    # 截止日期卖出，计算账户净值
+    cash += bond.sell_out_on_day(end_date)
+    invest_note.append({
+        "date": end_date,
+        "quantity": cash
+    })
+    return invest_note
+
+
+def fix_investment_plus_v1_1(bond:Bond, start, end, low_rr, high_rr, frequent, quantity):
+    """定投策略加强版 v1_1，根据目标收益率区间定投
+    根据估值进行定投，低于百分位p1, 买入; 高于百分位p2, 卖出; p1到p2之间，不操作, 持有现金
+    args:
+        bond: Bond 实例
+        low_rr: 低于该收益率买入
+        high_rr: 高于该收益率卖出
+        start: 字符串，示例：20200101
+        end: 同start
+        frequent: m表示月，w表示周，其余不支持
+        quantity: 定投金额
+    returns:
+        invest_note: 格式为 list({
+            "date": date,
+            "quantity": cash
+        })
+        cash为负表示买入，为正表示卖出
+    """
+    date_order = datetools.gen_date_order(start, end, frequent)
+    end_date = datetime.strptime(end, "%Y%m%d")
+    cash = 0
+    invest_note = []
+    origin_day = datetime.strptime("20050408", "%Y%m%d")
+    for d in date_order:
+        cash += quantity
+        invest_note.append({
+            "date": d,
+            "quantity": -quantity
+        })
+        boge_rr = bond.compute_boge_rr(origin_day, d)
+        if boge_rr <= low_rr:
+            # 低估买入
+            bond.buy_on_day(d, cash)
+            cash = 0
+        elif boge_rr >= high_rr:
             # 高估卖出
             cash += bond.sell_out_on_day(d)
         else:
