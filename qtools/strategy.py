@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-15 03:40:58
+@LastEditTime: 2021-08-15 13:13:45
 """
 
 import math
@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
-from numpy.lib.function_base import append
 from util import datetools
 
 

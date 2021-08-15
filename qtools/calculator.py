@@ -4,16 +4,69 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-01 17:42:03
+@LastEditTime: 2021-08-15 19:35:17
 """
 
+import math
 import os
 import sys
 
+sys.path.append(os.getcwd())
 from util import rr
 
-sys.path.append(os.getcwd())
 
+def irr():
+    pass
+
+
+def npv(start_amount, year, irr, frequently, cash_flow):
+    pass
+
+
+def nfv(start_amount, year, irr, frequently, cash_flow):
+    start_amount_fv = start_amount*math.pow(float(1+irr), year)
+    n = year
+    if frequently == 'm':
+        n = n * 12
+        irr = math.pow(1+irr, 1/12) - 1
+    elif frequently == 'w':
+        n = n * 365 / 7
+        irr = math.pow(1+irr, 7/365) - 1
+    if irr > 0:
+        cash_flow_fv = cash_flow * (math.pow((1+irr), n+1) - (1+irr))/irr
+    else:
+        cash_flow_fv = cash_flow * n
+    return round(cash_flow_fv + start_amount_fv, 2)
+
+
+def generate_investment_data(start_amount, year, irr, frequently, cash_flow, end_amount):
+    n = year
+    if frequently == 'm':
+        n = n * 12
+        irr = math.pow(1+irr, 1/12) - 1
+    elif frequently == 'w':
+        n = int(n * 365 / 7)
+        irr = math.pow(1+irr, 7/365) - 1
+    total_contribute = start_amount + cash_flow * n
+    x = [i for i in range(1, n+1)]
+    y_contribute = [start_amount + i*cash_flow for i in range(1, n+1)]
+    if irr > 0:
+        f = lambda i: round(start_amount*math.pow(1+irr, i) + cash_flow * (math.pow((1+irr), i+1) - (1+irr))/irr, 2)
+    else:
+        f = lambda i: round(start_amount*math.pow(1+irr, i) + cash_flow * i, 2)
+    y_total = [f(i) for i in range(1, n+1)]
+    cordinate = {
+        "x": x,
+        "y_contribute": y_contribute,
+        "y_total": y_total
+    }
+    summary = {
+        "total_contribute": round(total_contribute, 2),
+        "end_amount": round(end_amount, 2),
+        "interest": round(end_amount-total_contribute, 2),
+        "cycle": n
+    }
+    return summary, cordinate
 
 def get_cash_flow(invest_note):
     """根据投资记录生成现金流明细
@@ -63,4 +116,4 @@ def summary(invest_note, invest_res):
 
 
 if __name__ == "__main__":
-    pass
+   print(nfv(1000, 10, 0.12, 'w', 1000))
