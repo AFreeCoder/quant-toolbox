@@ -4,26 +4,80 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-15 19:35:17
+@LastEditTime: 2021-08-30 02:25:34
 """
 
 import math
 import os
 import sys
 
+import numpy as np
+
 sys.path.append(os.getcwd())
 from util import rr
 
 
-def irr():
-    pass
+def IRR(start_amount, year, frequently, cash_flow, end_amount):
+    """ irr计算
+    """    
+    n = year
+    if frequently == "m":
+        n *= 12
+    elif frequently == "w":
+        n = year * 365 / 7
+    cash_list = [cash_flow for x in range(n)]
+    cash_list[0] += start_amount
+    cash_list.append(-end_amount)
+    irr = np.irr(cash_list)
+    if frequently == "m":
+        irr = math.pow(1+irr, 12) - 1
+    elif frequently == "w":
+        irr = math.pow(1+irr, float(365)/7) - 1
+    return irr
 
 
-def npv(start_amount, year, irr, frequently, cash_flow):
-    pass
+def cf(start_amount, year, irr, frequently, end_amount):
+    """现金流计算
+    """    
+    start_amount_fv = start_amount*math.pow(float(1+irr), year)
+    n = year
+    if frequently == 'm':
+        n = n * 12
+        irr = math.pow(1+irr, 1/12) - 1
+    elif frequently == 'w':
+        n = n * 365 / 7
+        irr = math.pow(1+irr, 7/365) - 1
+    
+    cash_flow = np.pmt(irr, n, 0, end_amount-start_amount_fv, when="begin")
+    return -cash_flow
+
+
+def sa(year, irr, frequently, cash_flow, end_amount):
+    """初始金额
+    """    
+    start_amount_fv = end_amount - nfv(0, year, irr, frequently, cash_flow)
+    start_amount = start_amount_fv / math.pow(float(1+irr), year)
+    return start_amount
+
+
+def nper(start_amount, irr, frequently, cash_flow, end_amount):
+    """投资年限
+    """    
+    if frequently == "m":
+        irr = math.pow(1+irr, 1/12) - 1
+    elif frequently == "w":
+        irr = math.pow(1+irr, 7/365) - 1
+    year = np.nper(irr, -cash_flow, start_amount, end_amount, when="begin")
+    if frequently == "m":
+        year = year / 12
+    elif frequently == "w":
+        year = year * 7 / 365
+    return year
 
 
 def nfv(start_amount, year, irr, frequently, cash_flow):
+    """期末净值
+    """    
     start_amount_fv = start_amount*math.pow(float(1+irr), year)
     n = year
     if frequently == 'm':
@@ -40,7 +94,8 @@ def nfv(start_amount, year, irr, frequently, cash_flow):
 
 
 def generate_investment_data(start_amount, year, irr, frequently, cash_flow, end_amount):
-    n = year
+    n = int(year)
+    ori_irr = irr
     if frequently == 'm':
         n = n * 12
         irr = math.pow(1+irr, 1/12) - 1
@@ -49,7 +104,7 @@ def generate_investment_data(start_amount, year, irr, frequently, cash_flow, end
         irr = math.pow(1+irr, 7/365) - 1
     total_contribute = start_amount + cash_flow * n
     x = [i for i in range(1, n+1)]
-    y_contribute = [start_amount + i*cash_flow for i in range(1, n+1)]
+    y_contribute = [round(start_amount + i*cash_flow, 2) for i in range(1, n+1)]
     if irr > 0:
         f = lambda i: round(start_amount*math.pow(1+irr, i) + cash_flow * (math.pow((1+irr), i+1) - (1+irr))/irr, 2)
     else:
@@ -61,10 +116,14 @@ def generate_investment_data(start_amount, year, irr, frequently, cash_flow, end
         "y_total": y_total
     }
     summary = {
+        "start_amount": round(start_amount, 2),
         "total_contribute": round(total_contribute, 2),
         "end_amount": round(end_amount, 2),
         "interest": round(end_amount-total_contribute, 2),
-        "cycle": n
+        "cycle": n,
+        "irr": round(ori_irr, 4),
+        "cash_flow": round(cash_flow, 2),
+        "year": round(year, 2)
     }
     return summary, cordinate
 
