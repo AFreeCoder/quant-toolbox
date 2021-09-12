@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-30 02:25:34
+@LastEditTime: 2021-09-12 23:35:03
 """
 
 import math
@@ -67,7 +67,7 @@ def nper(start_amount, irr, frequently, cash_flow, end_amount):
         irr = math.pow(1+irr, 1/12) - 1
     elif frequently == "w":
         irr = math.pow(1+irr, 7/365) - 1
-    year = np.nper(irr, -cash_flow, start_amount, end_amount, when="begin")
+    year = np.nper(irr, -cash_flow, -start_amount, end_amount, when="begin")
     if frequently == "m":
         year = year / 12
     elif frequently == "w":
