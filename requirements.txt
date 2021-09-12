@@ -2,3 +2,5 @@
 tushare==1.2.53
 pandas==1.0.1
 pyyml==0.0.2
+Flask==1.1.2
+numpy==1.19.5

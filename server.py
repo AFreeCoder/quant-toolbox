@@ -4,13 +4,12 @@
 @Description: Do not edit
 @Date: 2021-08-15 13:01:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-08-29 19:49:43
+@LastEditTime: 2021-09-12 23:56:55
 """
 
 from flask import Flask, request
 
-from qtools import strategy
-from qtools.calculator import IRR, cf, generate_investment_data, nfv, sa, nper
+from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
 
 app = Flask(__name__)
 
@@ -18,7 +17,7 @@ app = Flask(__name__)
 def fix_investment_calculator():
     f = lambda key, default: request.args.get(key) if (request.args.get(key) != None and request.args.get(key) != "") else default
     start_amount = float(f("start_amount", 0))
-    year = int(f("year", 0))
+    year = float(f("year", 0))
     irr = float(f("irr", 0))/100
     frequently = f("frequently", "m")
     cash_flow = float(f("cash_flow", 0))
@@ -40,13 +39,6 @@ def fix_investment_calculator():
             "cordinate": cordinate
         }
     return res
-
-
-def filterParams(request, key, default):
-    value = request.get(key)
-    if value == None or value == "":
-        value = default
-    return value
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port="8000")
