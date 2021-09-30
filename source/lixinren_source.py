@@ -5,7 +5,7 @@
 @Description: 用于获取源数据，目标是获取尽可能全的数据
 @Date: 2021-09-16 00:50:22
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-09-25 20:17:48
+@LastEditTime: 2021-09-30 18:11:54
 """
 
 import logging
@@ -196,7 +196,7 @@ def get_day_data(codes:List[str], date: str):
             data[code].append([item["date"].split("T")[0], item["pe_ttm"]["avg"], item["pb"]["avg"], item["ps_ttm"]["avg"], item["dyr"]["avg"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "avg"])
             data[code].append([item["date"].split("T")[0], item["pe_ttm"]["median"], item["pb"]["median"], item["ps_ttm"]["median"], item["dyr"]["median"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "median"])
         except Exception as e:
-            logging.warning("get_day_data failed", e)
+            logging.warning("get_day_data failed:%s", e)
     return data
 
 

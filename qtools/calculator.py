@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-06-18 13:36:11
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-09-12 23:35:03
+@LastEditTime: 2021-09-30 18:10:43
 """
 
 import math
@@ -25,7 +25,7 @@ def IRR(start_amount, year, frequently, cash_flow, end_amount):
         n *= 12
     elif frequently == "w":
         n = year * 365 / 7
-    cash_list = [cash_flow for x in range(n)]
+    cash_list = [cash_flow for x in range(int(n))]
     cash_list[0] += start_amount
     cash_list.append(-end_amount)
     irr = np.irr(cash_list)
