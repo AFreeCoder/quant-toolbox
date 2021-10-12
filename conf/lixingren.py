@@ -4,7 +4,7 @@
 @Description: Do not edit
 @Date: 2021-09-21 17:00:40
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-09-26 00:17:13
+@LastEditTime: 2021-10-12 20:42:20
 """
 
 # metricsType
@@ -55,8 +55,8 @@ index_conf = {
         "metric_type": "ew",
         "temperature_type": "pe_ttm"
     },
-    # 中国互联网 H11136
-    "H11136": {
+    # 中国互联网50 H30533
+    "H30533": {
         "metric_type": "mcw",
         "temperature_type": "pe_ttm"
     }
@@ -71,5 +71,5 @@ candidate_codes = [
     "000932",
     "000991",
     "399812",
-    "H11136"
+    "H30533"
 ]

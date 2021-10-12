@@ -5,7 +5,7 @@
 @Description: 用于获取源数据，目标是获取尽可能全的数据
 @Date: 2021-09-16 00:50:22
 @LastEditors: wanghaijie01
-@LastEditTime: 2021-09-30 18:11:54
+@LastEditTime: 2021-10-12 20:44:14
 """
 
 import logging
@@ -142,7 +142,7 @@ def get_history_index(code: str, start: str, end: str):
             data.append([item["date"].split("T")[0], item["pe_ttm"]["avg"], item["pb"]["avg"], item["ps_ttm"]["avg"], item["dyr"]["avg"], item.get("cp", 0), item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "avg"])
             data.append([item["date"].split("T")[0], item["pe_ttm"]["median"], item["pb"]["median"], item["ps_ttm"]["median"], item["dyr"]["median"], item.get("cp", 0), item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "median"])
         except Exception as e:
-            logging.warning("get_history_index failed:%s, ori_data:%s", e, item)
+            logging.warning("code:%s get_history_index failed:%s, ori_data:%s", code, e, item)
     data.sort(key=lambda x: x[0])
     return data
     
@@ -190,13 +190,13 @@ def get_day_data(codes:List[str], date: str):
     for item in res['data']:
         try:
             code = item["stockCode"]
-            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["mcw"], item["pb"]["mcw"], item["ps_ttm"]["mcw"], item["dyr"]["mcw"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "mcw"])
-            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["ew"], item["pb"]["ew"], item["ps_ttm"]["ew"], item["dyr"]["ew"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "ew"])
-            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["ewpvo"], item["pb"]["ewpvo"], item["ps_ttm"]["ewpvo"], item["dyr"]["ewpvo"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "ewpvo"])
-            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["avg"], item["pb"]["avg"], item["ps_ttm"]["avg"], item["dyr"]["avg"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "avg"])
-            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["median"], item["pb"]["median"], item["ps_ttm"]["median"], item["dyr"]["median"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item["mc"], item["cmc"], item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "median"])
+            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["mcw"], item["pb"]["mcw"], item["ps_ttm"]["mcw"], item["dyr"]["mcw"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "mcw"])
+            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["ew"], item["pb"]["ew"], item["ps_ttm"]["ew"], item["dyr"]["ew"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "ew"])
+            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["ewpvo"], item["pb"]["ewpvo"], item["ps_ttm"]["ewpvo"], item["dyr"]["ewpvo"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "ewpvo"])
+            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["avg"], item["pb"]["avg"], item["ps_ttm"]["avg"], item["dyr"]["avg"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "avg"])
+            data[code].append([item["date"].split("T")[0], item["pe_ttm"]["median"], item["pb"]["median"], item["ps_ttm"]["median"], item["dyr"]["median"], item["cp"], item.get("r_cp", 0), item.get("cpc", 0), item.get("r_cpc", 0), item.get("mc", 0), item.get("cmc", 0), item.get("fb",0), item.get("sb",0), item.get("ha_shm", 0), "median"])
         except Exception as e:
-            logging.warning("get_day_data failed:%s", e)
+            logging.warning("code:%s get_day_data failed:%s", code, e)
     return data
 
 
@@ -212,7 +212,7 @@ def insert_by_date(conn: sqlite3.Connection, codes: List[str], date: str):
                 cursor.executemany(sql, day_data[code])
                 conn.commit()
             except Exception as e:
-                logging.warning("insert_by_date err: %s", e)
+                logging.warning("code:%s insert_by_date err: %s", code, e)
     cursor.close()
         
 
@@ -232,8 +232,6 @@ def update_latest_data(date=""):
         # 跳过周六日 isoweekday())
         if left.isoweekday() not in [6,7]:
             insert_by_date(conn, codes, date)
-            # pass
-        print(left, left.isoweekday())
         left += timedelta(days=1)
     conn.close()
 
