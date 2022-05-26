@@ -9,10 +9,11 @@
 
 from datetime import datetime
 
-from flask import Flask, request
+from flask import Flask, make_response, request
 
 from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
 from qtools.index import compute_percentile
+from fund_company import scale
 
 app = Flask(__name__)
 
@@ -73,5 +74,25 @@ def index_value_search():
     }
     return res
 
+
+@app.route("/finance/fund-company/scale", methods=["get"])
+def get_scale_info():
+    fund_type = request.args.get("fund_type")
+    orderby = request.args.get("orderBy")
+    orderdir = request.args.get("orderDir")
+    data = scale.format_scale_info(fund_type, orderby, orderdir)
+    res = {
+        "errno": 0,
+        "message": "success",
+        "data": {
+            "items": data
+        }
+    }
+    resp = make_response(res)
+    resp.headers["Access-Control-Allow-Credentials"] = "true"
+    resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    return resp
+
 if __name__ == '__main__':
+    app.config['JSON_AS_ASCII'] = False
     app.run(host="127.0.0.1", port="8000")
