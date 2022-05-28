@@ -1,6 +1,8 @@
 -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 tushare==1.2.53
-pandas==1.0.1
+pandas==1.4.2
 pyyml==0.0.2
-Flask==1.1.2
-numpy==1.19.5
+Flask==2.1.2
+numpy==1.22.4
+requests==2.27.1
+Flask-APScheduler==1.12.3
