@@ -1,8 +1,11 @@
+from cmath import nan
+from dataclasses import replace
 import requests
 import json
 from functools import lru_cache
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 from . import company
@@ -52,6 +55,8 @@ def get_yield_info(fund_type: str, orderby: str, orderdir: str):
     yield_infos = []
     for company_code in df_company["company_code"]:
         yield_info = get_yield_by_code(today, company_code, fund_type)
+        if len(yield_info) == 0:
+            continue
         item = {
             "company_code": company_code,
             "avg_six_month": yield_info[0][0],
@@ -62,8 +67,10 @@ def get_yield_info(fund_type: str, orderby: str, orderdir: str):
         yield_infos.append(item)
     df = pd.DataFrame(yield_infos)
     df = pd.merge(df, df_company[["company_code", "fund_company"]], how="left", on="company_code")
+    df.fillna("-", inplace=True)
     if not orderby:
         orderby = "avg_five_year"
+    df = df[df[orderby] != "-"]
     df.sort_values(by=orderby, ascending=(orderdir=="asc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
