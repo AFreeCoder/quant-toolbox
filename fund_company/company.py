@@ -1,6 +1,7 @@
+from datetime import datetime
 import json
-
 from functools import lru_cache
+
 import pandas as pd
 import numpy as np
 import requests
@@ -45,14 +46,26 @@ def get_company_list_by_fund_type(date_str: str, fund_type: str):
         "fname": "fund_company",
         "sname": "short_name",
         "FundCount": "fund_count",
-        "TotalScale": "total_scale",
+        "TotalScale": "scale",
         "RDate": "update_date"
     }, inplace=True)
     # 对异常值进行处理
-    df.replace({'total_scale': {"--": 0}}, inplace=True)
+    df.replace({'scale': {"--": 0}}, inplace=True)
     df.replace({'update_date': {"--": ""}}, inplace=True)
     df.replace({'fund_count': {"": 0}}, inplace=True)
     # 更改数据类型
-    df["total_scale"] = df["total_scale"].astype(float)
+    df["scale"] = df["scale"].astype(float)
     df["fund_count"] = df["fund_count"].astype(int)
     return df
+
+
+def get_company_detail(orderby: str, orderdir: str):
+    today = datetime.now().strftime("%Y-%m-%d")
+    # 获取基金公司名单
+    df = get_company_list_by_fund_type(today, "all")
+    if not orderby:
+        orderby = "scale"
+    df = df.sort_values(by=orderby, ascending=(orderdir=="asc"), ignore_index=True)
+    df.index = df.index + 1
+    df.reset_index(inplace=True)
+    return df.to_dict("records")

@@ -28,7 +28,7 @@ def get_work_year_info(orderdir: str):
     # 获取基金公司名单
     df_company = company.get_company_list_by_fund_type(today, "all")
     work_year_infos = []
-    for company_code in df_company["company_code"][:4]:
+    for company_code in df_company["company_code"]:
         info = get_work_year_by_code(today, company_code)
         if not info[1].isdigit():
             continue

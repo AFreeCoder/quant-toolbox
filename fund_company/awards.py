@@ -3,8 +3,6 @@ from functools import lru_cache
 
 import pandas as pd
 
-import os
-
 from . import company
 
 data_file = "./data/fund_company_awards.csv"
@@ -18,7 +16,6 @@ def read_awards_info(date_str: str):
 def get_awards_info(orderdir: str):
     today = datetime.now().strftime("%Y-%m-%d")
     # 获取基金公司名单
-    print(os.getcwd())
     df_company = company.get_company_list_by_fund_type(today, "all")
     df = read_awards_info(today)
     df = pd.merge(df, df_company[["fund_company", "company_code"]], how="left", on="fund_company")
