@@ -13,7 +13,7 @@ from flask import Flask, make_response, request
 
 from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
 from qtools.index import compute_percentile
-from fund_company import scale, company_yield, work_year
+from fund_company import scale, company_yield, work_year, awards
 from cron import crontask
 
 app = Flask(__name__)
@@ -117,6 +117,23 @@ def get_yield_info():
 def get_work_year_info():
     orderdir = request.args.get("orderDir")
     data = work_year.get_work_year_info(orderdir)
+    res = {
+        "errno": 0,
+        "message": "success",
+        "data": {
+            "items": data
+        }
+    }
+    resp = make_response(res)
+    resp.headers["Access-Control-Allow-Credentials"] = "true"
+    resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    return resp
+
+
+@app.route("/finance/fund-company/awards", methods=["get"])
+def get_awards_info():
+    orderdir = request.args.get("orderDir")
+    data = awards.get_awards_info(orderdir)
     res = {
         "errno": 0,
         "message": "success",
