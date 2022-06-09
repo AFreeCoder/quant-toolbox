@@ -50,16 +50,16 @@ def get_company_list_by_fund_type(date_str: str, fund_type: str):
         "RDate": "update_date"
     }, inplace=True)
     # 对异常值进行处理
-    df.replace({'scale': {"--": 0}}, inplace=True)
+    df.replace({'scale': {"--": 0, "":0}}, inplace=True)
     df.replace({'update_date': {"--": ""}}, inplace=True)
     df.replace({'fund_count': {"": 0}}, inplace=True)
     # 更改数据类型
     df["scale"] = df["scale"].astype(float)
-    df["fund_count"] = df["fund_count"].astype(int)
+    df["fund_count"] = df["fund_count"].astype(float).apply(np.int64)
     return df
 
 
-def get_company_detail(orderby: str, orderdir: str):
+def get_company_base(orderby: str, orderdir: str):
     today = datetime.now().strftime("%Y-%m-%d")
     # 获取基金公司名单
     df = get_company_list_by_fund_type(today, "all")

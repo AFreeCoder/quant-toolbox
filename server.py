@@ -13,7 +13,7 @@ from flask import Flask, make_response, request
 
 from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
 from qtools.index import compute_percentile
-from fund_company import company, scale, company_yield, work_year, awards
+from fund_company import company, scale, company_yield, work_year, awards, scale_ratio
 from cron import crontask
 
 app = Flask(__name__)
@@ -76,11 +76,11 @@ def index_value_search():
     return res
 
 
-@app.route("/finance/fund-company/detail", methods=["get"])
-def get_company_detail_info():
+@app.route("/finance/fund-company/base", methods=["get"])
+def get_company_base_info():
     orderby = request.args.get("orderBy")
     orderdir = request.args.get("orderDir")
-    data = company.get_company_detail(orderby, orderdir)
+    data = company.get_company_base(orderby, orderdir)
     res = {
         "errno": 0,
         "message": "success",
@@ -157,6 +157,23 @@ def get_awards_info():
         "message": "success",
         "data": {
             "items": data
+        }
+    }
+    resp = make_response(res)
+    resp.headers["Access-Control-Allow-Credentials"] = "true"
+    resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    return resp
+
+
+@app.route("/finance/fund-company/scale-ratio", methods=["get"])
+def get_scale_ratil_info():
+    company_code = request.args.get("company_code")
+    data = scale_ratio.get_scale_ratio(company_code)
+    res = {
+        "errno": 0,
+        "message": "success",
+        "data": {
+            "scale_ratio": data
         }
     }
     resp = make_response(res)
