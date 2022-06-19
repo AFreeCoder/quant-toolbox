@@ -18,7 +18,7 @@ headers = {'content-type': 'application/json',
           }
 
 
-@lru_cache(maxsize=256, typed=True)
+@lru_cache(maxsize=2048, typed=True)
 def get_yield_by_code(date_str: str, company_code: str, fund_type: str):
     url = base_host + "/Company/home/GetSygmChart"
     header = {

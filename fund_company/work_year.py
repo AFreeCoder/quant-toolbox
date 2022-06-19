@@ -35,11 +35,11 @@ def get_work_year_info(orderdir: str):
         work_year_infos.append({
             "company_code": company_code,
             "work_year": info[0],
-            "rank": info[1],
+            "rank": int(info[1]),
         })
     df = pd.DataFrame(work_year_infos)
     df = pd.merge(df, df_company, how="left", on="company_code")
-    df.sort_values(by="rank", ascending=(orderdir=="asc"), inplace=True, ignore_index=True)
+    df.sort_values(by="rank", ascending=(orderdir=="desc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
     return df.to_dict("records")
