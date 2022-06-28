@@ -1,5 +1,3 @@
-from cmath import nan
-from dataclasses import replace
 import requests
 import json
 from functools import lru_cache
@@ -48,7 +46,28 @@ def get_yield_by_code(date_str: str, company_code: str, fund_type: str):
     return resp
 
 
-def get_yield_info(fund_type: str, orderby: str, orderdir: str):
+def get_yield_detail(company_code: str, fund_type: str):
+    today = datetime.now().strftime("%Y-%m-%d")
+    yield_info = get_yield_by_code(today, company_code, fund_type)
+    res = {
+        'product': ['近6月', '近1年', '近3年', "近5年"]
+    }
+    if len(yield_info) == 0:
+        res["current"] = [0,0,0,0]
+        res["similar"] = [0,0,0,0]
+        res["contrast"] = [0,0,0,0]
+        return res
+
+    current = [yield_info[0][0], yield_info[0][1], yield_info[0][2], yield_info[0][3]]
+    similar = [yield_info[1][0], yield_info[1][1], yield_info[1][2], yield_info[1][3]]
+    contrast = [yield_info[2][0], yield_info[2][1], yield_info[2][2], yield_info[2][3]]
+    res["current"] = [0 if not x or x == '-' else x for x in current]
+    res["similar"] = [0 if not x or x == '-' else x for x in similar]
+    res["contrast"] = [0 if not x or x == '-' else x for x in contrast]
+    return res
+
+
+def get_yield_rank(fund_type: str, orderby: str, orderdir: str):
     today = datetime.now().strftime("%Y-%m-%d")
     # 获取基金公司名单
     df_company = company.get_company_list_by_fund_type(today, "all")

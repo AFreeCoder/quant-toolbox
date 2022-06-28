@@ -1,4 +1,3 @@
-from curses.ascii import isdigit
 import requests
 import json
 from functools import lru_cache

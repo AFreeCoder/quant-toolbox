@@ -118,7 +118,7 @@ def get_yield_info():
     fund_type = request.args.get("fund_type")
     orderby = request.args.get("orderBy")
     orderdir = request.args.get("orderDir")
-    data = company_yield.get_yield_info(fund_type, orderby, orderdir)
+    data = company_yield.get_yield_rank(fund_type, orderby, orderdir)
     res = {
         "errno": 0,
         "message": "success",
@@ -166,7 +166,7 @@ def get_awards_info():
 
 
 @app.route("/finance/fund-company/scale-ratio", methods=["get"])
-def get_scale_ratil_info():
+def get_scale_ratio_info():
     company_code = request.args.get("company_code")
     data = scale_ratio.get_scale_ratio(company_code)
     res = {
@@ -174,6 +174,24 @@ def get_scale_ratil_info():
         "message": "success",
         "data": {
             "scale_ratio": data
+        }
+    }
+    resp = make_response(res)
+    resp.headers["Access-Control-Allow-Credentials"] = "true"
+    resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    return resp
+
+
+@app.route("/finance/fund-company/yield-detail", methods=["get"])
+def get_yield_detail():
+    company_code = request.args.get("company_code")
+    fund_type = request.args.get("fund_type")
+    data = company_yield.get_yield_detail(company_code, fund_type)
+    res = {
+        "errno": 0,
+        "message": "success",
+        "data": {
+            "yield_detail": data
         }
     }
     resp = make_response(res)
