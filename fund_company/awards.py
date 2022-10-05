@@ -18,7 +18,7 @@ def get_awards_info(orderdir: str):
     # 获取基金公司名单
     df_company = company.get_company_list_by_fund_type(today, "all")
     df = read_awards_info(today)
-    df = pd.merge(df, df_company[["fund_company", "company_code"]], how="left", on="fund_company")
+    df = pd.merge(df, df_company[["fund_company", "company_code"]], how="inner", on="fund_company")
     df.sort_values(by="award_count", ascending=(orderdir=="asc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
