@@ -7,138 +7,210 @@
 @LastEditTime: 2021-09-26 01:41:40
 """
 
+from dis import code_info
 import os
-import sqlite3
 import sys
-from datetime import datetime, timedelta
-from typing import List
 
 import pandas as pd
 
 sys.path.append(os.getcwd())
-from conf import lixingren
+from source import index
 
+code_metrics_info = {
+    # 沪深300
+    "000300": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # 中证500
+    "000905": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # # 中证红利
+    # "000922": {
+    #     "metrics_name": "pb",
+    #     "metrics_type": "mcw"
+    # }, 
+    # 创业板指
+    "399006": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # 全指信息
+    "000993": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # 中证消费
+    "000932": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # 全指医药
+    "000991": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }, 
+    # 中证养老
+    "399812": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    },  
+    # 中国互联网50
+    "H30533": {
+        "metrics_name": "ps_ttm",
+        "metrics_type": "mcw"
+    },
+    # 中证1000
+    "000852": {
+        "metrics_name": "pb",
+        "metrics_type": "mcw"
+    }
+}
 
 class Index:
 
-    def __init__(self, code:str) -> None:
-        self.code = code
-        self.index_conf = lixingren.index_conf[code]
-        self.table_name = "index_" + self.code
-        self.metric_type = self.index_conf["metric_type"]
-        self.conn = sqlite3.connect("data/index.db")
-        self.basic = self.load_basic()
-        self.data = self.load_data()
+    def __init__(self) -> None:
+        self.index_dao = index.Index()
 
-    def load_basic(self):
-        sql = "select * from `{}`".format("index_basic")
-        data = pd.read_sql(sql, self.conn, index_col="stockCode", parse_dates=["launchDate"])
-        basic = data.loc[self.code].to_dict()
-        return basic
+    def get_latest_index_fundmental_percentile_list(self, codes: list, granularity: str):
+        index_obj = index.Index()
+        index_basic = index_obj.load_index_basic()
+        percentile_list = []
+        for code in codes:
+            if code not in code_metrics_info:
+                continue
+            # 指标的权重计算需要和指数的权重计算方式保持一致，因为最终买的是指数
+            # caculationMethod 说明：https://www.lixinger.com/wiki/index-point-calculation-method
+            # 目前看，只有分级靠挡下PB加权是合理的（大部分指数都是）
+            # 红利指数PB计算的问题：https://zhuanlan.zhihu.com/p/410016876
+            code_name = index_basic.at[code, "name"]
+            metrics_name = code_metrics_info[code]["metrics_name"]
+            metrics_type = code_metrics_info[code]["metrics_type"]
+            granularity = "y10"
+            latest_data = index_obj.get_latest_index_fundmental_percentile(code, metrics_name, metrics_type, granularity)
+            percentile_text = str(round(latest_data[7] * 100, 2)) + "%"
+            percentile_list.append(
+                {
+                    "id": latest_data[0],
+                    "code": latest_data[1],
+                    "name": code_name,
+                    "metrics_name": metrics_name,
+                    "update_date": latest_data[5],
+                    "cvpos": latest_data[7],
+                    "percentile": percentile_text,
+                    "recommend_position": str(recommend_positioin(latest_data[7])),
+                    "recommend_operation": recommend_operation(latest_data[7])
+                }
+            )
+        return percentile_list
 
-    def load_data(self):
-        sql = "select * from `{}` where metric_type='{}'".format(self.table_name, self.metric_type)
-        data = pd.read_sql(sql, self.conn, parse_dates=["date"])
-        data.sort_values(by="date", ascending=True, inplace=True)
+
+
+    def get_latest_index_fundmental_percentile_data(self, code: str):
+        data = self.get_latest_index_fundmental_percentile_list([code], "y10")[0]
+        data["cvpos"] = round(data["cvpos"] *100, 2)
         return data
 
-    def compute_percentile_by_date(self, date:str):
-        """根据输入日期计算pe、pb百分位。计算周期为8年，不满8年，使用全部历史数据。
-        args:
-            date: 日期
-        return:
-            res: dict
-                - pe_ttm
-                - pe_ttm_percentile
-                - pb
-                - pb_percentile
-        """
-        date = datetime.strptime(date, "%Y-%m-%d")
-        history_df = self.data[self.data["date"]<=date]
-        day_data = history_df.iloc[-1]
-        # 剔除8年前的数据
-        # n_year_before = date + timedelta(days=-2920)
-        n_year_before = date + timedelta(days=-3650)
-        history_df = history_df[history_df["date"]>n_year_before]
-        pe_ttm = day_data["pe_ttm"]
-        pe_ttm_percentile = len(history_df[history_df["pe_ttm"]<day_data["pe_ttm"]])/len(history_df)
-        pb = day_data["pb"]
-        pb_percentile = len(history_df[history_df["pb"]<day_data["pb"]])/len(history_df)
-        res = {
-            "code": self.code,
-            "name": self.basic["name"],
-            "date": datetime.strftime(day_data["date"], "%Y-%m-%d") ,
-            "pe_ttm": round(pe_ttm, 2),
-            "pe_ttm_percentile": round(pe_ttm_percentile, 4),
-            "pb": round(pb, 2),
-            "pb_percentile": round(pb_percentile, 4)
-        }
-        pt = pe_ttm_percentile
-        if self.index_conf["temperature_type"] == "pb":
-            pt = pb_percentile
-        res["pt"] = pt
-        res["T"] = temperature_format(pt)
-        res["level"] = temperature_level(pt)
-        return res
+
+    def get_index_line_plot_data(self, codes: str, metrics: str):
+        if metrics in ["cp", "pe_ttm", "pb", "ps_ttm"]:
+            return self.get_index_fundmental_plot_data(codes, metrics)
+        elif metrics in ["pb-percentile"]:
+            return self.get_index_fundmental_percentile_plot_data(codes)
+        else:
+            return {}
 
 
-    def compute_max_drawdown(self, date: str):
-        date = datetime.strptime(date, "%Y-%m-%d")
-        df = self.data[self.data["date"]>=date]
-        i = 0; j = i+1
-        hindex = 0
-        lindex = 0
-        max_drawdown = 0
-        while i<=j<len(df):
-            df.iloc[i]["cp"]
-            if df.iloc[i]["cp"]-df.iloc[j]["cp"] > max_drawdown:
-                max_drawdown = df.iloc[i]["cp"] - df.iloc[j]["cp"]
-                hindex = i
-                lindex = j
-            if df.iloc[j]["cp"] > df.iloc[i]["cp"]:
-                i=j
-                j=j+1
+    def get_index_fundmental_percentile_plot_data(self, codes: str):
+        index_obj = index.Index()
+        df = pd.DataFrame()
+        for code in codes.split(","):
+            metrics_name = index.code_metrics_info[code]["metrics_name"]
+            metrics_type = index.code_metrics_info[code]["metrics_type"]
+            df_temp = index_obj.load_index_fundmental_percentile(code, metrics_name, metrics_type, "y10")
+            df_temp["cvpos"] = round(df_temp["cvpos"] * 100, 2)
+            df_temp.rename(columns={
+                "cvpos": code + "_y_data"
+            }, inplace=True)
+            if df.empty:
+                df = df_temp
             else:
-                j=j+1
-        ratio = max_drawdown / df.iloc[hindex]["cp"]
-        print(df.iloc[hindex])
-        print(df.iloc[lindex])
-        return ratio
+                df = pd.merge(df, df_temp, on="date", how="outer")
+        df.sort_values(by="date", ascending=True, inplace=True)
+        df.fillna(0, inplace=True)
+        data = {
+            "x_data": df["date"].tolist(),
+            "count": len(df["date"])
+        }
+        for code in codes.split(","):
+            data[code + "_y_data"] = df[code + "_y_data"].tolist()
+        return data
 
 
-def compute_percentile(date: str, stock_code: List[str]):
-    codes = lixingren.candidate_codes
-    if len(stock_code) != 0:
-        codes = stock_code.split(",")
-    res = []
-    for code in codes:
-        index = Index(code)
-        pt = index.compute_percentile_by_date(date)
-        res.append(pt)
-    res.sort(key=lambda x:x["pt"])
-    return res
+    def get_index_fundmental_plot_data(self, codes: str, metrics: str):
+        index_obj = index.Index()
+        df = pd.DataFrame()
+        for code in codes.split(","):
+            metrics_type = index.code_metrics_info[code]["metrics_type"]
+            df_temp = index_obj.load_index_fundmental(code, metrics_type)
+            df_temp[metrics] = round(df_temp[metrics], 2)
+            df_temp.rename(columns={
+                metrics: code + "_y_data"
+            }, inplace=True)
+            if df.empty:
+                df = df_temp
+            else:
+                df = pd.merge(df, df_temp, on="date", how="outer")
+        df.sort_values(by="date", ascending=True, inplace=True)
+        df.fillna(0, inplace=True)
+        data = {
+            "x_data": df["date"].tolist(),
+            "count": len(df["date"])
+        }
+        for code in codes.split(","):
+            data[code + "_y_data"] = df[code + "_y_data"].tolist()
+        return data
 
 
-def temperature_format(pt: float):
-    value = round(pt * 100, 2)
-    temperature = str(value) + "℃"
-    return temperature
-
-
-def temperature_level(temperature: float):
-    """温度等级：L, M, H
-    """
-    if temperature <= 0.3:
-        return "L"
-    elif temperature >=0.7:
-        return "H"
+def recommend_positioin(percentile: float):
+    p_int = round(percentile * 100)
+    if p_int >= 70:
+        return [0, 0]
+    elif p_int >= 60:
+        return [0, 10]
+    elif p_int >= 50:
+        return [10, 20]
+    elif p_int >= 40:
+        return [20, 30]
+    elif p_int >= 30:
+        return [30, 40]
+    elif p_int >= 20:
+        return [40, 50]
+    elif p_int >= 10:
+        return [50, 60]
+    elif p_int >= 5:
+        return [60, 70]
     else:
-        return "M"
+        return [80, 100]
+
+
+def recommend_operation(percentile: float):
+    p_int = round(percentile * 100)
+    if p_int >= 70:
+        return "卖出，至少不要买入"
+    elif p_int >= 45:
+        return "谨慎买入"
+    elif p_int >= 30:
+        return "乐观买入"
+    elif p_int >= 10:
+        return "大胆买入"
+    elif p_int >= 5:
+        return "闭着眼买入"
+    else:
+        return "啥也别说了，冲！"
 
 
 if __name__ == "__main__":
-    code = "000300"
-    index = Index(code)
-    res = index.compute_percentile_by_date("2021-09-22")
-    # res = index.compute_max_drawdown("2020-09-21")
-    print(res)
+    pass
