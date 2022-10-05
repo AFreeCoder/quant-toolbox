@@ -244,4 +244,4 @@ def get_debt_fed_data():
 if __name__ == '__main__':
     crontask.start()
     app.config['JSON_AS_ASCII'] = False
-    app.run(host="127.0.0.1", port="8000")
+    app.run(host="0.0.0.0", port="8000")
