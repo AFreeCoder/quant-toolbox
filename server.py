@@ -65,7 +65,7 @@ def get_company_base_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -84,7 +84,7 @@ def get_scale_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -103,7 +103,7 @@ def get_yield_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 @app.route("/finance/fund-company/work-year", methods=["get"])
@@ -119,7 +119,7 @@ def get_work_year_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -136,7 +136,7 @@ def get_awards_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -153,7 +153,7 @@ def get_scale_ratio_info():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -171,7 +171,7 @@ def get_yield_detail():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -187,7 +187,7 @@ def get_index_fundmental_percentile():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -204,7 +204,7 @@ def get_latest_index_fundmental_percentile_list():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -221,7 +221,7 @@ def get_index_fundmental_line_plot_data():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -237,7 +237,7 @@ def get_debt_fed_data():
     }
     resp = make_response(res)
     resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.com.cn"
+    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
