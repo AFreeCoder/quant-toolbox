@@ -22,4 +22,4 @@ def get_awards_info(orderdir: str):
     df.sort_values(by="award_count", ascending=(orderdir=="asc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
-    return df.to_dict("records")
+    return df

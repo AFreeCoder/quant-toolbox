@@ -41,4 +41,4 @@ def get_work_year_info(orderdir: str):
     df.sort_values(by="rank", ascending=(orderdir=="desc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
-    return df.to_dict("records")
+    return df

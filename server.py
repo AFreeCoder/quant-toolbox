@@ -6,21 +6,27 @@
 @LastEditors: wanghaijie01
 @LastEditTime: 2021-09-26 00:20:53
 """
+from datetime import datetime
+import logging
+
 from flask import Flask, make_response, request
 
 from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
-from fund_company import company, scale, company_yield, work_year, awards, scale_ratio
+from fund_company import company, scale, company_yield, work_year, awards, scale_ratio, company_filter
 from cron import crontask
 from qtools import index as qindex
 from qtools import debt as qdebt
 
 app = Flask(__name__)
 
+ACCESS_CONTROL_ALLOW_ORIGIN = "http://localhost:3000"
 
-@app.route('/pyecharts/stacked_area_chart')
-def root():
-    app.static_folder = "."
-    return app.send_static_file('stacked_area_chart.html')
+@app.after_request
+def after_request(response):
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Origin"] = ACCESS_CONTROL_ALLOW_ORIGIN
+    return response
 
 
 @app.route('/calculator/investment/fixed', methods=["get"])
@@ -64,8 +70,6 @@ def get_company_base_info():
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -74,17 +78,15 @@ def get_scale_info():
     fund_type = request.args.get("fund_type")
     orderby = request.args.get("orderBy")
     orderdir = request.args.get("orderDir")
-    data = scale.format_scale_info(fund_type, orderby, orderdir)
+    df = scale.format_scale_info(fund_type, orderby, orderdir)
     res = {
         "errno": 0,
         "message": "success",
         "data": {
-            "items": data
+            "items": df.to_dict("records")
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -93,50 +95,44 @@ def get_yield_info():
     fund_type = request.args.get("fund_type")
     orderby = request.args.get("orderBy")
     orderdir = request.args.get("orderDir")
-    data = company_yield.get_yield_rank(fund_type, orderby, orderdir)
+    df = company_yield.get_yield_rank(fund_type, orderby, orderdir)
     res = {
         "errno": 0,
         "message": "success",
         "data": {
-            "items": data
+            "items": df.to_dict("records")
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 @app.route("/finance/fund-company/work-year", methods=["get"])
 def get_work_year_info():
     orderdir = request.args.get("orderDir")
-    data = work_year.get_work_year_info(orderdir)
+    df = work_year.get_work_year_info(orderdir)
     res = {
         "errno": 0,
         "message": "success",
         "data": {
-            "items": data
+            "items": df.to_dict("records")
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
 @app.route("/finance/fund-company/awards", methods=["get"])
 def get_awards_info():
     orderdir = request.args.get("orderDir")
-    data = awards.get_awards_info(orderdir)
+    df = awards.get_awards_info(orderdir)
     res = {
         "errno": 0,
         "message": "success",
         "data": {
-            "items": data
+            "items": df.to_dict("records")
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -152,8 +148,6 @@ def get_scale_ratio_info():
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -170,8 +164,21 @@ def get_yield_detail():
         }
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
+    return resp
+
+
+@app.route("/finance/fund-company/filter-res", methods=["post"])
+def get_fund_company_filter_res():
+    json_body = request.get_json()
+    df = company_filter.apply_condition_expression(json_body["conditions"])
+    res = {
+        "errno": 0,
+        "message": "success",
+        "data": {
+            "items": df.to_dict("records")
+        }
+    }
+    resp = make_response(res)
     return resp
 
 
@@ -186,8 +193,6 @@ def get_index_fundmental_percentile():
         "data": data
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -203,8 +208,6 @@ def get_latest_index_fundmental_percentile_list():
         "data": data
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
@@ -220,28 +223,35 @@ def get_index_fundmental_line_plot_data():
         "data": data
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
 @app.route("/debt/mix-metrics/fed", methods=["get"])
 def get_debt_fed_data():
     code = request.args.get("stock_code")
+    compute_method = request.args.get("compute_method")
     debt = qdebt.Debt()
-    data = debt.compute_fed(code)
+    data = debt.compute_fed(code, compute_method)
     res = {
         "errno": 0,
         "message": "success",
         "data": data
     }
     resp = make_response(res)
-    resp.headers["Access-Control-Allow-Credentials"] = "true"
-    resp.headers["Access-Control-Allow-Origin"] = "https://afreecoder.cn"
     return resp
 
 
 if __name__ == '__main__':
+    # 设置日志
+    today = datetime.now().strftime("%Y%m%d")
+    logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
+                    filename='logs/service-' + today + '.log',
+                    filemode='a',##模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志
+                    #a是追加模式，默认如果不写的话，就是追加模式
+                    format=
+                    '%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
+                    #日志格式
+                    )
     crontask.start()
     app.config['JSON_AS_ASCII'] = False
     app.run(host="0.0.0.0", port="8000")

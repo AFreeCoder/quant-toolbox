@@ -1,4 +1,5 @@
 import time
+import logging
 from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -57,9 +58,13 @@ def polling_macro_info():
 def start():
     sched = BackgroundScheduler()
     sched.add_job(polling_company_yield, "cron", day="*", hour=6, minute=10)
+    logging.info("%s polling company yield finished!", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     sched.add_job(polling_manager_work_year, "cron", day="*", hour=8, minute=10)
+    logging.info("%s polling manager work year finished!", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     sched.add_job(polling_index_fundmentail_info, "cron", day="*", hour=20, minute=10)
+    logging.info("%s polling index fundmentail info!", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     sched.add_job(polling_macro_info, "cron", day="*", hour=20, minute=20)
+    logging.info("%s polling macro info!", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":

@@ -93,4 +93,4 @@ def get_yield_rank(fund_type: str, orderby: str, orderdir: str):
     df.sort_values(by=orderby, ascending=(orderdir=="asc"), inplace=True, ignore_index=True)
     df.index = df.index + 1
     df.reset_index(inplace=True)
-    return df.to_dict("records")
+    return df

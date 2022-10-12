@@ -13,7 +13,7 @@ COPY requirements.txt /app
 
 WORKDIR /app
 
-RUN mkdir data \
+RUN mkdir data logs\
     && pip install -r requirements.txt
 
 EXPOSE 8000
