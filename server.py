@@ -244,7 +244,7 @@ def get_debt_fed_data():
 if __name__ == '__main__':
     # 设置日志
     today = datetime.now().strftime("%Y%m%d")
-    logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
+    logging.basicConfig(level=logging.INFO,#控制台打印的日志级别
                     filename='logs/service-' + today + '.log',
                     filemode='a',##模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志
                     #a是追加模式，默认如果不写的话，就是追加模式
