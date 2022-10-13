@@ -21,7 +21,7 @@ class Debt:
         if compute_method == "-": 
             df["fed"] = round((1/df["pe_ttm"] - df["mir_y10"]) * 100, 3)
         else:
-            df["fed"] = round((1/df["pe_ttm"] / df["mir_y10"]) * 100, 3)
+            df["fed"] = round((1/df["pe_ttm"] / df["mir_y10"]), 3)
         df.sort_values(by="date", ascending=True, inplace=True)
         data = {
             "x_data": df["date"].tolist(),
