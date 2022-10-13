@@ -8,6 +8,7 @@
 """
 from datetime import datetime
 import logging
+import sys
 
 from flask import Flask, make_response, request
 
@@ -19,13 +20,16 @@ from qtools import debt as qdebt
 
 app = Flask(__name__)
 
-ACCESS_CONTROL_ALLOW_ORIGIN = "http://localhost:3000"
+RUN_ENV = "dev"
 
 @app.after_request
 def after_request(response):
+    allow_origin = "http://localhost:3000"
+    if RUN_ENV == "release":
+        allow_origin = "https://afreecoder.cn"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Origin"] = ACCESS_CONTROL_ALLOW_ORIGIN
+    response.headers["Access-Control-Allow-Origin"] = allow_origin
     return response
 
 
@@ -242,6 +246,8 @@ def get_debt_fed_data():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) >= 2:
+        RUN_ENV = sys.argv[1]
     # 设置日志
     today = datetime.now().strftime("%Y%m%d")
     logging.basicConfig(level=logging.INFO,#控制台打印的日志级别
@@ -254,4 +260,5 @@ if __name__ == '__main__':
                     )
     crontask.start()
     app.config['JSON_AS_ASCII'] = False
+    
     app.run(host="0.0.0.0", port="8000")
