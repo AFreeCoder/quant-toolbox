@@ -21,59 +21,6 @@ index_basic_table = "index_basic"
 index_fundmental_table_tpl = "index_{}_fundmental"
 index_percentile_fundmental_table_tpl = "index_{}_percentile_fundmental"
 
-code_metrics_info = {
-    # 沪深300
-    "000300": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # 中证500
-    "000905": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # # 中证红利
-    # "000922": {
-    #     "metrics_name": "pb",
-    #     "metrics_type": "mcw"
-    # }, 
-    # 创业板指
-    "399006": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # 全指信息
-    "000993": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # 中证消费
-    "000932": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # 全指医药
-    "000991": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }, 
-    # 中证养老
-    "399812": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    },  
-    # 中国互联网50
-    "H30533": {
-        "metrics_name": "ps_ttm",
-        "metrics_type": "mcw"
-    },
-    # 中证1000
-    "000852": {
-        "metrics_name": "pb",
-        "metrics_type": "mcw"
-    }
-}
-
 
 class Index:
     """用于获取原始数据
@@ -563,8 +510,8 @@ class Index:
         self.init_index_fundmental_table(code)
         self.init_index_percentile_fundmental_table(code)
         start, end = self.get_fundmental_update_interval_by_index(code)
-        ## 因为接口中部分字段数据更新延迟，故start选取2天之前的日期，用于更新历史数据
-        start = start + timedelta(days=-2)
+        ## 因为接口中部分字段数据更新延迟，故start选取7天之前的日期，用于更新历史数据
+        start = start + timedelta(days=-7)
         while start <= end:
             next_start = start + timedelta(days=3650)
             fundmental_data, percentile_data = self.get_index_fundmental_data([code], start, next_start)

@@ -11,7 +11,7 @@ import math
 import os
 import sys
 
-import numpy as np
+import numpy_financial as npf
 
 sys.path.append(os.getcwd())
 from util import rr
@@ -28,7 +28,7 @@ def IRR(start_amount, year, frequently, cash_flow, end_amount):
     cash_list = [cash_flow for x in range(int(n))]
     cash_list[0] += start_amount
     cash_list.append(-end_amount)
-    irr = np.irr(cash_list)
+    irr = npf.irr(cash_list)
     if frequently == "m":
         irr = math.pow(1+irr, 12) - 1
     elif frequently == "w":
@@ -48,7 +48,7 @@ def cf(start_amount, year, irr, frequently, end_amount):
         n = n * 365 / 7
         irr = math.pow(1+irr, 7/365) - 1
     
-    cash_flow = np.pmt(irr, n, 0, end_amount-start_amount_fv, when="begin")
+    cash_flow = npf.pmt(irr, n, 0, end_amount-start_amount_fv, when="begin")
     return -cash_flow
 
 
@@ -67,7 +67,7 @@ def nper(start_amount, irr, frequently, cash_flow, end_amount):
         irr = math.pow(1+irr, 1/12) - 1
     elif frequently == "w":
         irr = math.pow(1+irr, 7/365) - 1
-    year = np.nper(irr, -cash_flow, -start_amount, end_amount, when="begin")
+    year = npf.nper(irr, -cash_flow, -start_amount, end_amount, when="begin")
     if frequently == "m":
         year = year / 12
     elif frequently == "w":
