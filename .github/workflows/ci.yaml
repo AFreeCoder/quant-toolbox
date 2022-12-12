@@ -1,0 +1,15 @@
+name: quant-tool-build
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+    build:
+        # 后续可以改成自己的服务器
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v3
+        - name: docker build
+          run: docker build . --file Dockerfile -t quant-toolbox:$(date +%Y%m%d%H%M%S) --platform=linux/amd64
