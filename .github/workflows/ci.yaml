@@ -8,8 +8,26 @@ jobs:
     build:
         # 后续可以改成自己的服务器
         runs-on: ubuntu-latest
-
         steps:
         - uses: actions/checkout@v3
         - name: docker build
-          run: docker build . --file Dockerfile -t quant-toolbox:$(date +%Y%m%d%H%M%S) --platform=linux/amd64
+          run: |
+            docker build . --file Dockerfile -t quant-toolbox:v0.$GITHUB_RUN_NUMBER --platform=linux/amd64
+            docker save -o quant-toolbox.tar.gz quant-toolbox:v0.$GITHUB_RUN_NUMBER
+        - uses: actions/upload-artifact
+          with:
+            name: quant-toolbox.tar.gz
+            path: ./quant-toolbox.tar.gz
+    deploy:
+        runs-on: unbuntu-latest
+        steps:
+        - uses: actions/download-artifact
+          with:
+            name: quant-toolbox.tar.gz
+        - name: deploy quant-toolbox
+          env:
+            HOST: TENCENT_HOST
+            KEY: TENCENT_PRI_KEY
+          run: |
+            mkdir -p ~/.ssh/ && echo "$KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+            scp -o StrictHostKeyChecking=no -r quant-toolbox.tar.gz work@${HOST}:/home/work/software
