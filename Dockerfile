@@ -1,4 +1,4 @@
-FROM python:3.9.14
+FROM python:3.9.16-slim
 
 MAINTAINER afreecoder@163.com
 
