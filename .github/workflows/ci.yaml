@@ -10,32 +10,50 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+        # 拉取对应代码
         - uses: actions/checkout@v3
 
         - name: docker build
           run: |
-             touch quant-toolbox.tar.gz
-             echo 1111 > quant-toolbox.tar.gz
-#            docker build . --file Dockerfile -t quant-toolbox:v0.$GITHUB_RUN_NUMBER --platform=linux/amd64
-#            docker save -o quant-toolbox.tar.gz quant-toolbox:v0.$GITHUB_RUN_NUMBER
+            docker build . --file Dockerfile -t quant-toolbox:v0.$GITHUB_RUN_NUMBER --platform=linux/amd64
+            docker save -o quant-toolbox.tar.gz quant-toolbox:v0.$GITHUB_RUN_NUMBER
 
         - uses: actions/upload-artifact@v3
           with:
             name: quant-toolbox.tar.gz
             path: ./quant-toolbox.tar.gz
+        - uses: actions/upload-artifact@v3
+          with:
+            name: deploy.sh
+            path: ./deploy.sh
     deploy:
         needs: [build]
+        env:
+          DEPLOY_HOST: ${{ secrets.TENCENT_HOST }}
+          DEPLOY_KEY: ${{ secrets.TENCENT_PRI_KEY }}
         runs-on: ubuntu-latest
-
         steps:
-        - uses: actions/download-artifact@v2
+        - uses: actions/download-artifact@v3
           with:
             name: quant-toolbox.tar.gz
+        - uses: actions/download-artifact@v3
+          with:
+            name: deploy.sh
+        - name: RSyncer Action
+          uses: Pendect/action-rsyncer@v2.0.0
+          with:
+            flags: '-avzrP --delete'
+            options: ''
+            ssh_options: ''
+            src: './'
+            dest: 'work@${DEPLOY_HOST}:/home/work/artifact/quant-toolbox'
+
+        - name: Display status from deploy
+          run: echo "${{ steps.deploy.outputs.status }}"
 
         - name: deploy quant-toolbox
-          env:
-            HOST: ${{ secrets.TENCENT_HOST }}
-            KEY: ${{ secrets.TENCENT_PRI_KEY }}
           run: |
-            mkdir -p ~/.ssh/ && echo "$KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-            scp -o StrictHostKeyChecking=no -r quant-toolbox.tar.gz work@${HOST}:/home/work/software
+            mkdir -p ~/.ssh/ && echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+            scp -o StrictHostKeyChecking=no -r quant-toolbox.tar.gz deploy.sh work@${DEPLOY_HOST}:/home/work/artifact/quant-toolbox
+            ssh -o StrictHostKeyChecking=no work@${DEPLOY_HOST} "cd /home/work/artifact/quant-toolbox && sh deploy.sh"
+
