@@ -54,6 +54,5 @@ jobs:
         - name: deploy quant-toolbox
           run: |
             mkdir -p ~/.ssh/ && echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-            scp -o StrictHostKeyChecking=no -r quant-toolbox.tar.gz deploy.sh work@${DEPLOY_HOST}:/home/work/artifact/quant-toolbox
             ssh -o StrictHostKeyChecking=no work@${DEPLOY_HOST} "cd /home/work/artifact/quant-toolbox && sh deploy.sh"
 

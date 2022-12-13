@@ -127,8 +127,8 @@ class Index:
         index_obj = index.Index()
         df = pd.DataFrame()
         for code in codes.split(","):
-            metrics_name = index.code_metrics_info[code]["metrics_name"]
-            metrics_type = index.code_metrics_info[code]["metrics_type"]
+            metrics_name = code_metrics_info[code]["metrics_name"]
+            metrics_type = code_metrics_info[code]["metrics_type"]
             df_temp = index_obj.load_index_fundmental_percentile(code, metrics_name, metrics_type, "y10")
             df_temp["cvpos"] = round(df_temp["cvpos"] * 100, 2)
             df_temp.rename(columns={
@@ -153,7 +153,7 @@ class Index:
         index_obj = index.Index()
         df = pd.DataFrame()
         for code in codes.split(","):
-            metrics_type = index.code_metrics_info[code]["metrics_type"]
+            metrics_type = code_metrics_info[code]["metrics_type"]
             df_temp = index_obj.load_index_fundmental(code, metrics_type)
             df_temp[metrics] = round(df_temp[metrics], 2)
             df_temp.rename(columns={

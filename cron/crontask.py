@@ -60,7 +60,7 @@ def start():
     sched = BackgroundScheduler()
     sched.add_job(polling_company_yield, "cron", day="*", hour=6, minute=10)
     sched.add_job(polling_manager_work_year, "cron", day="*", hour=8, minute=10)
-    sched.add_job(polling_index_fundmentail_info, "cron", day="*", hour=20, minute=10)
+    sched.add_job(polling_index_fundmentail_info, "cron", day="*", hour=21, minute=10)
     sched.add_job(polling_macro_info, "cron", day="*", hour=20, minute=20)
     sched.start()
 
