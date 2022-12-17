@@ -44,7 +44,7 @@ def polling_index_fundmentail_info():
     """
     index_obj = index.Index()
     codes = lixingren.index_list
-    index_obj.insert_or_update_index_fundmental(codes)
+    index_obj.init_insert_or_update_index_fundmental(codes)
     return
 
 

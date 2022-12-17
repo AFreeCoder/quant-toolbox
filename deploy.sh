@@ -4,7 +4,7 @@ if [ -n $OLD_CONTAINER_ID ];then
     docker container stop $OLD_CONTAINER_ID
     docker container rm $OLD_CONTAINER_ID
 fi
-echo "stop and rm old container, done!"
+echo "stop and rm old container success!"
 
 
 # 删除旧镜像
@@ -13,13 +13,13 @@ if [ -n $OLD_IMAGE_ID ]; then
     docker image rm $OLD_IMAGE_ID
 fi
 
-echo "rm old image, done!"
+echo "rm old image success!"
 
 # 加载新镜像
 docker image load -i quant-toolbox.tar.gz
-echo "load new container, done!"
+echo "load new container success!"
 
 # 启用新容器
 IMAGEID=`docker image ls quant-toolbox -q`
-docker container run --name quant-toolbox -p 8000:8000 -v /home/work/data/quant-toolbox/data:/app/data -e LXR_TOKEN -d $IMAGEID
-echo "run new container done"
+docker container run --name quant-toolbox -p 8000:8000 -v /home/work/online/quant-toolbox/data:/app/data /home/work/online/quant-toolbox/logs:/app/logs -e LXR_TOKEN -d $IMAGEID
+echo "run new container success"
