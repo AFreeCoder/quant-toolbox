@@ -21,5 +21,5 @@ echo "load new container success!"
 
 # 启用新容器
 IMAGEID=`docker image ls quant-toolbox -q`
-docker container run --name quant-toolbox -p 8000:8000 -v /home/work/online/quant-toolbox/data:/app/data /home/work/online/quant-toolbox/logs:/app/logs -e LXR_TOKEN -d $IMAGEID
+docker container run --name quant-toolbox -p 8000:8000 -v /home/work/online/quant-toolbox/data:/app/data -v /home/work/online/quant-toolbox/logs:/app/logs -e LXR_TOKEN -d $IMAGEID
 echo "run new container success"
