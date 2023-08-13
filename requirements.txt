@@ -4,7 +4,7 @@ pyyml==0.0.2
 Flask==2.1.2
 numpy==1.22.4
 numpy-financial==1.0.0
-requests==2.31.1
+requests==2.31.0
 Flask-APScheduler==1.12.3
 pyecharts==1.9.1
 lxml==4.9.1
