@@ -1,7 +1,5 @@
 FROM python:3.9.16-slim
 
-MAINTAINER afreecoder@163.com
-
 COPY conf /app/conf
 COPY cron /app/cron
 COPY fund_company /app/fund_company

@@ -3,6 +3,7 @@ name: quant-tool-build
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
     build:
