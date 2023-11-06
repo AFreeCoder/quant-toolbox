@@ -14,7 +14,6 @@ from flask import Flask, make_response, request
 
 from qtools.calculator import IRR, cf, generate_investment_data, nfv, nper, sa
 from fund_company import company, scale, company_yield, work_year, awards, scale_ratio, company_filter
-from cron import crontask
 from qtools import index as qindex
 from qtools import debt as qdebt
 
@@ -258,7 +257,6 @@ if __name__ == '__main__':
                     '%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
                     #日志格式
                     )
-    crontask.start()
     app.config['JSON_AS_ASCII'] = False
     
     app.run(host="0.0.0.0", port="8000")
